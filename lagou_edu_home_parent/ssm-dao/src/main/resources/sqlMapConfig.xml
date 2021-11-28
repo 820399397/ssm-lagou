@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <!--是否开启自动驼峰命名规则的映射，即数据库列名A_COLUMN 自动映射到 AColumn
+            比如：表中的字段名是 a_name,实体类中的属性名是 aName,
+                    在这种情况下：可以配置这段标签实现自动封装
+        -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+</configuration>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--创建映射文件的要求是：所在包和AccountMapper所在的包相同，并且文件名都要相同-->
+
+<!--namespace的值就是dao接口的全路径-->
+<mapper namespace="cn.xuguowen.mapper.AccountMapper">
+    <!--id的值必须与dao中的方法名相同-->
+    <select id="findAll" resultType="account">
+        select * from account
+    </select>
+
+    <insert id="save" parameterType="account">
+        <!-- 需要注意的是：#{name}……必须和实体类中的属性名一致，因为要通过get方法获取到属性的值进行插入-->
+        insert into account (name,money) values(#{name},#{money})
+    </insert>
+
+    <select id="findById" parameterType="int" resultType="account">
+        select * from account where id = #{id}
+    </select>
+
+    <update id="update" parameterType="account">
+        update account set name = #{name},money = #{money} where id = #{id}
+    </update>
+
+    <!--参数类型是int类型的数组-->
+    <delete id="deleteBatch" parameterType="int">
+        delete from account
+        <where>
+            <foreach collection="array" open="id in(" close=")" separator="," item="id">
+                #{id}
+            </foreach>
+        </where>
+    </delete>
+
+</mapper>

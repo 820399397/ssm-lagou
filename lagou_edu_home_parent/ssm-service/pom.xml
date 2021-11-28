@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>lagou_edu_home_parent</artifactId>
+        <groupId>cn.xuguowen</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ssm-service</artifactId>
+
+    <dependencies>
+        <!--service工程直接依赖于dao工程，间接依赖于pojo，utils工程-->
+        <dependency>
+            <groupId>cn.xuguowen</groupId>
+            <artifactId>ssm-dao</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>

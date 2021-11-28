@@ -1,0 +1,27 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--配置注解扫描-->
+    <context:component-scan base-package="cn.xuguowen.controller"></context:component-scan>
+
+    <!--显示的配置处理器映射器和处理器适配器,而且支持json数据的读取-->
+    <mvc:annotation-driven/>
+
+    <!--显示的配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!--开启静态资源的加载:前端控制器配置的是/，需要显示的配置xml代码，进行静态资源的放行-->
+    <mvc:default-servlet-handler/>
+
+</beans>

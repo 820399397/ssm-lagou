@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--配置ioc注解扫描-->
+    <context:component-scan base-package="cn.xuguowen.servie"/>
+
+    <!--spring整合mybatis的开始-->
+    <!--引入外部的jdbc文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!--
+        1.sqlSessionFactory（线程安全的）的创建交给spring的ioc容器，sqlSession会话对象是线程不安全的
+        2.在配置了这个标签之后，sqlsession会话对象也就存储到ioc容器中了（先这样理解）
+    -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="typeAliasesPackage" value="cn.xuguowen.pojo"></property>
+        <!--如果还需要mybatis的核心配置文件的话，也可以在这里引入,也就是在加载spring核心配置文件的同时加载了mybatis的配置文件-->
+        <property name="configLocation" value="classpath:SqlMapConfig.xml"></property>
+    </bean>
+
+    <!--映射接口扫描配置 spring去创建代理对象，并存储到ioc容器中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--我们要告诉它去扫描哪里的接口，并且生成该接口的实现类对象-->
+        <property name="basePackage" value="cn.xuguowen.mapper"></property>
+    </bean>
+</beans>

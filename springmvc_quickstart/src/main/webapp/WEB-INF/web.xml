@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <!--解决所有请求的乱码问题-->
+    <filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <!--使用utf-8编码进行编码和解码-->
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>characterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!--配置mvc的前端控制器 DispathcerServlet，通过名称我猜测他就是一个servlet-->
+    <servlet>
+        <servlet-name>dispatcherServlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!--
+            现在启动项目，是访问不到/quick的，因为没有加载mvc的核心配置文件，
+            也就没有生成bean对象，也就访问不到bean对象中的方法
+            所以：我们要在前端控制器初始化时，就加载mvc的配置文件
+        -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:spring-mvc.xml</param-value>
+        </init-param>
+        <!--
+            那么你还得知道前端控制器（servlet）的生命周期：当第一次请求的时候，就会通过构造方法创建servlet实例,
+            然后紧接着执行init()方法，进行初始化得操作（加载mvc得配置文件）
+            但是我现在要求项目启动（web应用）时，就完成前端控制器（servlet）得初始化，并加载mvc得配置文件
+        -->
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dispatcherServlet</servlet-name>
+        <!--
+                大前提:前端控制器只负责handler（controller）中业务方法的处理
+               面试题: / 和 /*的区别
+                    1./  表示匹配所有的访问（请求）路径（/update），但是不匹配带有后缀名的访问路径（a.jsp ……）
+                            配置为 / ，他是可以匹配到某个控制器中的某个业务方法的
+                    2./* 表示匹配所有的访问路径（/login、a.jsp）
+                            配置为 /*，他有可能带着有后缀名的请求去处理器映射器中查找对应controller中的某个业务方法，
+                                        发现找不到就报404错误
+        -->
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!--响应状态码为500应该展现的页面-->
+    <error-page>
+        <error-code>500</error-code>
+        <location>/500.jsp</location>
+    </error-page>
+    <!--响应状态码为404应该展现的页面-->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/404.jsp</location>
+    </error-page>
+
+</web-app>

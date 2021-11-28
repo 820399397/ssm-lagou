@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="cn.xuguowen.dao.CourseMapper">
+    <!-- 根据课程名称和课程状态进行的多条件查询 -->
+    <!-- List<Course> findCourseByCondition(CourseVO courseVO) -->
+    <select id="findCourseByCondition" parameterType="cn.xuguowen.pojo.CourseVO" resultType="cn.xuguowen.pojo.Course">
+        select * from course
+        <where>
+            <if test="courseName != null and '' != courseName ">
+                and course_name like concat('%',#{courseName},'%')
+            </if>
+            <if test="status != null and '' != status ">
+                and status = #{status}
+            </if>
+            <!-- 每一次的查询都是去查询逻辑上没有被删除的数据，在表中是is_del这个字段来维护
+                        0 表示逻辑上没有被删除
+                        1 表示逻辑上被删除了
+                 逻辑删除这个字段出现的目的是：在实际开发中，数据是非常中重要的。不能随便删除数据。
+                 所以说借助逻辑删除这个字段表示数据是否逻辑删除，如果数据被删除了
+                 但是实际情况下：数据还是存在于这张表中的
+             -->
+            <if test="true">
+                and is_del = 0
+            </if>
+
+        </where>
+    </select>
+
+    <!--void saveCourse(Course course);-->
+    <insert id="saveCourse" parameterType="cn.xuguowen.pojo.Course">
+        INSERT INTO course(
+        course_name,
+        brief,
+        preview_first_field,
+        preview_second_field,
+        course_img_url,
+        course_list_img,
+        sort_num,
+        price,
+        discounts,
+        sales,
+        discounts_tag,
+        course_description_mark_down,
+        create_time,
+        update_time
+        ) VALUES(#{courseName},#{brief},#{previewFirstField},#{previewSecondField},
+        #{courseImgUrl},#{courseListImg},#{sortNum},#{price},#{discounts},#{sales},
+        #{discountsTag},#{courseDescriptionMarkDown},#{createTime},#{updateTime})
+
+
+        <!--需要注意的是：在插入完成之后，要将课程的id信息返回：课程的id信息是数据库自增长的-->
+        <!--
+            返回值为int类型的，在执行完插入语句之后执行，数据库中course表中的id字段名是 id
+            要将返回的id值封装到course实体中的id属性上
+        -->
+        <selectKey resultType="int" order="AFTER" keyColumn="id" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <!--void saveTeacher(Teacher teacher);-->
+    <insert id="saveTeacher" parameterType="cn.xuguowen.pojo.Teacher">
+        INSERT INTO teacher(
+            course_id,
+            teacher_name,
+            POSITION,
+            description,
+            create_time,
+            update_time
+        ) VALUES
+        (
+            #{courseId},#{teacherName},#{position},#{description},#{createTime},
+            #{updateTime}
+        );
+    </insert>
+
+
+    <!--CourseVO findCourseById(Integer id);-->
+    <select id="findCourseById" parameterType="int" resultType="cn.xuguowen.pojo.CourseVO">
+        SELECT c.*,t.teacher_name,t.position,t.description FROM course c
+        LEFT JOIN teacher t ON c.id = t.course_id WHERE c.id = #{id}
+    </select>
+
+    <!-- void updateCourse(Course course);-->
+    <update id="updateCourse" parameterType="cn.xuguowen.pojo.Course">
+        <!-- 需要注意的是：页面中带有 * 号的文本框是不能为空的，用户必须填写 -->
+        update course
+        <!--
+            1.prefix表示前缀：也就是加上的set标签
+            2.suffixOverrides 去掉最后一个 ，号
+        -->
+        <trim prefix="set" suffixOverrides=",">
+            <!-- 对参数Course中的字段进行判断，不能为空或者为 "" -->
+            <if test="courseName != null and courseName != '' ">
+                course_name = #{courseName},
+            </if>
+            <if test="brief != null and brief != '' ">
+                brief=#{brief},
+            </if>
+            <if test="previewFirstField != null and previewFirstField != '' ">
+                preview_first_field=#{previewFirstField},
+            </if>
+            <if test="previewSecondField != null and previewSecondField != '' ">
+                preview_second_field=#{previewSecondField},
+            </if>
+            <if test="courseImgUrl != null and courseImgUrl != '' ">
+                course_img_url=#{courseImgUrl},
+            </if>
+            <if test="courseListImg != null and courseListImg != '' ">
+                course_list_img=#{courseListImg},
+            </if>
+            <if test="sortNum != null and sortNum != '' ">
+                sort_num=#{sortNum},
+            </if>
+            <if test="price != null and price != '' ">
+                price=#{price},
+            </if>
+            <if test="discounts != null and discounts != '' ">
+                discounts=#{discounts},
+            </if>
+            <if test="sales != null and sales != '' or sales==0 ">
+                sales=#{sales},
+            </if>
+            <if test="discountsTag != null and discountsTag != '' ">
+                discounts_tag=#{discountsTag},
+            </if>
+            <if test="courseDescriptionMarkDown != null and courseDescriptionMarkDown != '' ">
+                course_description_mark_down=#{courseDescriptionMarkDown},
+            </if>
+            <if test="updateTime != null ">
+                update_time=#{updateTime},
+            </if>
+        </trim>
+
+        <where>
+            <if test="id != null and id != '' ">id = #{id}</if>
+        </where>
+    </update>
+
+    <!--void updateTeacher(Teacher teacher);-->
+    <update id="updateTeacher" parameterType="cn.xuguowen.pojo.Teacher">
+        UPDATE teacher
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teacherName != null and teacherName != ''">
+                teacher_name = #{teacherName},
+            </if>
+            <if test="position != null and position != ''">
+                position = #{position},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+            <if test="updateTime != null">
+                update_time=#{updateTime},
+            </if>
+        </trim>
+        <where>
+            <if test="courseId != null and courseId != '' ">course_id = #{courseId}</if>
+        </where>
+    </update>
+
+    <!-- void updateCourseStatus(Course course);-->
+    <update id="updateCourseStatus" parameterType="cn.xuguowen.pojo.Course">
+        update course set status = #{status},update_time = #{updateTime} where id = #{id}
+    </update>
+</mapper>

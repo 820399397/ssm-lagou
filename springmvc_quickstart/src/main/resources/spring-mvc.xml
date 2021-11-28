@@ -1,0 +1,94 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--
+        开启注解扫描：此时注解扫描只扫描controller包下的注解，
+        其他的注解扫描在spring的核心配置文件中配置，没必要进行重复的扫描
+    -->
+    <context:component-scan base-package="cn.xuguowen.controller"/>
+
+    <!--显示配置处理器映射器和处理器适配器-->
+    <!--
+        在开发中经常使用这个标签显示的配置处理器映射器和处理器适配器，
+        配置了这个标签之后，还增强了功能，支持json字符串的读写（不需要使用json的API了）
+
+        conversion-service="conversionService" 自定义类型转换器
+    -->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!--显示的配置视图解析器-->
+   <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+       <!--
+            在处理器handler中返回的是逻辑视图名，需要拼接上真实的物理地址
+            /WEB-INF/pages/逻辑视图名称.jsp
+       -->
+       <!--配置前缀-->
+        <property name="prefix" value="/WEB-INF/pages/"></property>
+       <!--配置后缀-->
+       <property name="suffix" value=".jsp"></property>
+   </bean>
+
+    <!--
+            1.自定义类型转换器
+                   ①：注意把包导对 org.springframework.context.support.ConversionServiceFactoryBean
+    -->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+       <property name="converters">
+           <set>
+               <bean class="cn.xuguowen.converter.DateConverter"></bean>
+           </set>
+       </property>
+    </bean>
+
+    <!--
+        解决前端控制器url-pattern在 / 的配置下，带有后缀名的静态资源会被拦截，
+        不会交给其他组件去执行，出现404的错误
+        mapping:表示/js下的文件以及子目录都不会被前端控制器拦截，都会被放行
+        location:静态资源所在的目录。找到所在的目录，然后加载静态资源文件，这样就不会出现404的错误
+    -->
+    <!--开启静态资源可以访问的方式一：放行指定的url，可以去加载到静态资源-->
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/img/**" location="/img/"/>
+    <!--开启静态资源可以访问的方式二:放行全部的url，也就是可以加载所有的静态资源-->
+    <!--开启DefaultServlet处理静态资源-->
+<!--    <mvc:default-servlet-handler/>-->
+
+    <!--
+        1.配置文件上传解析器对象
+            当提交表单后，文件会先经过文件上传解析器进行解析，解析完毕之后封装为MultipartFile对象，
+            这个对象中存储着文件的信息，可以调用它的方法完成文件的上传
+    -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--可以对此文件解析器配置一些属性-->
+        <!--设置文件上传的最大值为5MB 5 * 1024 * 1024-->
+        <property name="maxUploadSize" value="5242880"/>
+        <!--设置文件上传时写入内存的最大值，如果小于这个value值就不会创建临时文件，默认值时10240-->
+        <property name="maxInMemorySize" value="40960"/>
+    </bean>
+
+    <bean id="globalExceptionResolver" class="cn.xuguowen.exception.GlobalExceptionResolver"></bean>
+
+    <!--配置拦截器链 当配置了多个拦截器后，要注意拦截器的执行顺序-->
+    <mvc:interceptors>
+        <!--自定义拦截器一-->
+        <mvc:interceptor>
+            <!--拦截路径配置-->
+            <mvc:mapping path="/**"/> <!--表示对所有请求controller中的方法都进行拦截-->
+            <!--自定义拦截器类-->
+            <bean class="cn.xuguowen.interceptor.MyInterceptor1"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="cn.xuguowen.interceptor.MyInterceptor2"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>
